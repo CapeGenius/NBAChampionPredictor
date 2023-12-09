@@ -32,9 +32,8 @@ def pca(data_array):
     for i in range(k):
         principal_components[i] = new_eigenvectors[i]
         
-
+    # projected NBA team data onto these principal components
     projected_components = np.transpose((data_array @ np.transpose(principal_components)))
-    
 
     return projected_components.tolist()
 
@@ -43,7 +42,8 @@ def create_train_test(index_dict, projected_components_list):
     
     result_list = []
     print("The size is", len(projected_components_list[0]))
-    
+
+    # adds another column that identifies 0 with nonchampioon team, and 1 with champion team
     for x in range(725):
         #print(x)
         if x in index_dict:
@@ -53,10 +53,11 @@ def create_train_test(index_dict, projected_components_list):
     
     print("Length of 1", len(result_list))
     print("Length of 2", len(projected_components_list[0]))
+
+    #add results to principal components lists and adds test train results (0 or 1)
     projected_components_list.append(result_list)
     test_train_array = np.array(projected_components_list)
     test_train_array = np.transpose(test_train_array)
-    
     
     return test_train_array
     
@@ -105,8 +106,6 @@ projected_components = pca(all_team_array)
 python_team_components = pca(python_team_array)
 projected_2024_components = pca(season_2024_array)
 
-
-
 # creating two separate data structures for projected components
 final_component_1 = projected_components[0]
 final_component_2 = projected_components[1]
@@ -117,8 +116,6 @@ champion_components_2 = final_component_2[0:24]
 
 nonchampion_components_1 = final_component_1[25:724]
 nonchampion_components_2 = final_component_2[25:724]
-
-#2023 2024 components
 
 #plotting the champion vs non champion PCA graph
 plt.scatter(champion_components_1,champion_components_2,s = 10)
@@ -139,6 +136,7 @@ test_train_array = create_train_test(champion_dict, python_team_components)
 
 columns2 = list()
 
+# creates column name for k eigenvectors
 for i in range(k):
     columns2.append('Eigenvector '+str(i+1))
 print(columns2)
@@ -164,8 +162,8 @@ print("sm is ", sm)
 #oversample the data
 x_res, y_res = sm2.fit_resample(X_train, y_train)
 
-
-param_grid = {'random_state': range(1,100)}  
+#parameter grid for hyperparameter testing
+param_grid = {'C': range(1,100), 'random_state': range(1,100)}  
 
 # apply a linear svc to the classification
 h1=svm.LinearSVC(C=26, class_weight={0:5, 1:200})
@@ -199,12 +197,6 @@ print(classification_report(y_test, y_pred))
 #print("The best estimator is ",h1.best_estimator_)
 #print("The best params is ",h1.best_params_)
 
-
-#decision_function = h1.decision_function(X)
-    # we can also calculate the decision function manually
-    # decision_function = np.dot(X, clf.coef_[0]) + clf.intercept_[0]
-    # The support vectors are the samples that lie within the margin
-    # boundaries, whose size is conventionally constrained to 1
 X_1, y_1 = make_blobs(n_samples=40, centers=2, random_state=0)
 C = 26
 
